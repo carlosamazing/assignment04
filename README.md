@@ -1,6 +1,5 @@
 # assignment04
 
-Lezhi Cao 
+Lezhi Cao & Xinwen Zhang
 
-assignment 04 04
 
