@@ -19,6 +19,7 @@ library(srvyr)
 library(haven)
 library(ggplot2)
 library(treemapify)
+library(ggridges)
 
 ```
 
@@ -26,7 +27,8 @@ library(treemapify)
 # Visualization 01 (1 point)
 
 ```{r}
-gun_d <- read_csv("~/Desktop/Data Science/Assignment04/gun_deaths_us_1999_2019.csv") 
+gun_d <- read_csv("~/Desktop/Data Science/Assignment04/gun_deaths_us_1999_2019.csv")
+
 gun.3states <- filter(
   gun_d, 
   (State == "NY") | (State == "PA") | (State == "MD")
@@ -63,28 +65,77 @@ ggplot(gun.3states.d, aes(
     reflow = T)+ 
   geom_treemap_subgroup_text(
     place = "center", 
-    alpha = 0.5, 
+    alpha = 0.3, 
     color = "lightgrey", 
-    min.size =0)+ 
+    min.size =0,
+    grow = T)+ 
   scale_fill_manual(
-    values = c("NY" = "#FFB900", 
+    values = c("NY" = "skyblue3", 
                "PA" = "#002147",
-               "MD" = "black"))+ 
+               "NJ" = "darkgoldenrod"))+ 
   #color chosen from the different state colors 
-  labs(title= (paste ("Cumulative Gun Death by County for New York (NY), Pennsylvania (PA) and \nMaryland (MD): 1999- 2019*")), 
-       subtitle = "PA has the highest cumulative Gun Death by State and Individual County", 
+  labs(title= (paste ("Cumulative Gun Deaths by County for New York (NY), Pennsylvania (PA) and \nNew Jersey (NJ): 1999 - 2019*")), 
+       subtitle = "PA has the highest cumulative Gun Deaths by State and Individual County", 
        caption = "*Counties with cumulative gun deaths lower than 100 are merged into the other category
-Data: Center for Disease Control and Prevention") +
+Data: Centers for Disease Control and Prevention") +
   theme(plot.title = element_text(size=11, face = "bold"),
         plot.subtitle = element_text(size=8.5, face = "italic"),
         plot.caption = element_text(size = 7))
 
 ```
+
 Data URL: https://data.world/nkrishnaswami/gun-deaths-by-county/workspace/project-summary?agentid=nkrishnaswami&datasetid=gun-deaths-by-county
 \newpage
 
 # Visualization 02 (2 points)
 ```{r}
+gun.states <- 
+  gun_d %>%
+  filter(State == "PA" | State == "NY" | State == "NJ") %>%
+  group_by(State,Year) %>%
+  select(State,Year,Population,Deaths) %>%
+  summarize(deaths=sum(Deaths), population = sum(Population)) 
+
+ggplot(gun.states, aes(x = Year)) +
+  geom_line(aes(y = deaths, 
+                color = "Gun Deaths"), 
+            size = 2) +
+  geom_line(aes(y = population/11000, color = "Population"), size = 1) +
+  scale_color_manual(
+    values = c("Population" = "lightblue", "Gun Deaths" = "pink"),
+    labels = c("Gun Deaths", "Population")
+  ) +
+  facet_wrap(~ State, ncol = 3) +
+  labs(
+    title = "Population and Gun Deaths for New Jersey (NJ), New Jersey (NJ) and \nPennslyvania (PA): 1999 - 2019",
+    subtitle = "On average, NJ and NY's population and gun death have a similar trend, while PA's gun death trend \nstart to deviate from population trend since 2014.",
+    caption = "Data: Centers for Disease Control and Prevention") +
+  theme_minimal() +
+  scale_y_continuous(
+    name = "Gun Deaths",
+    limits = c(0, 1600),
+    breaks = seq(0, 1600, 100),
+    sec.axis = sec_axis(
+      ~ . *11000,
+      name = "Population",
+      breaks = seq(5*10^6, 17600000, by = 1100000),
+      labels = c("5M", "6.1M", "7.2M", "8.3M", "9.4M", "10.5M", "11.6M","12.7M", "13.8M", "14.9M", "16M", "17.1M")
+    )
+  )+  
+   scale_x_continuous(
+    breaks = seq(1999, 2019, 5), labels = seq(1999, 2019, 5)   
+  )+
+  theme(plot.title = element_text(size=11, face = "bold"),
+        plot.subtitle = element_text(size=8.5, face = "italic"),
+        plot.caption = element_text(size = 6.5),
+        legend.title = element_blank(), 
+        legend.text = element_text(size = 6),
+        legend.position = "bottom",
+        axis.text = element_text(size=7),
+        axis.title = element_text(size=7),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank())
+
 
 
 ```
