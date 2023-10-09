@@ -1,7 +1,7 @@
 ---
 title: "Data Science for Public Policy"
 subtitle: "Applied Introduction to R's Tidyverse"
-author: "Lezhi Charles Cao - lc1267// Xinwen Zhang"
+author: "Lezhi Charles Cao - lc1267// Xinwen Zhang - xz540"
 format: 
   html:
     code-line-numbers: true
@@ -23,10 +23,13 @@ library(ggridges)
 
 ```
 
+The following Visualizations' dataset is obtained from: Data.world, originally sourced from Centers for Disease Control and Prevention.
+
+Data URL: https://data.world/nkrishnaswami/gun-deaths-by-county/workspace/project-summary?agentid=nkrishnaswami&datasetid=gun-deaths-by-county
 
 # Visualization 01 (1 point)
 
-This treemap visualizes the cumulative gun deaths by county for New York (NY), Pennsylvania (PA), and New Jersey (NJ) from 1999 to 2019. It highlights the disparities in gun deaths across counties within these states, with counties having fewer than 100 cumulative deaths combined into the "Other" category. This information is crucial for policymakers, as it identifies regions with higher gun violence rates, allowing for targeted intervention and resource allocation.
+This treemap visualizes the cumulative gun deaths by county for New York (NY), Pennsylvania (PA), and New Jersey (NJ) from 1999 to 2019. Our group selected these states because they are adjacent and are relatively comparable. The visualization highlights the disparities and overview in gun deaths across counties within these states, with counties having fewer than 100 cumulative deaths combined into the "Other" category. This information is crucial for policymakers, as it identifies regions with higher gun violence rates, allowing for targeted intervention and resource allocation.
 
 ```{r}
 gun_d <- read_csv("gun_deaths_us_1999_2019.csv")
@@ -35,18 +38,15 @@ gun.3states <- filter(
   gun_d, 
   (State == "NY") | (State == "PA") | (State == "NJ")
   ) 
+
 gun.3states.d <- gun.3states %>% 
   group_by(State, County) %>% 
-  summarize(total_deaths = sum(Deaths), 
-            .groups = "drop") 
-
-gun.3states.d <- gun.3states.d %>% 
-  group_by(State, County) %>% 
-  summarise(total_deaths = sum(total_deaths)) %>% 
-  ungroup() %>% 
+  summarize(total_deaths = sum(Deaths)) %>%
   mutate(County = if_else(total_deaths < 100, 
                           "Other", County))  %>%
-  group_by(State, County) 
+   group_by(State, County) %>% 
+  summarize(total_deaths = sum(total_deaths))
+
 #counties with total gun death lower than 100 is combined into the
 #other category
 
@@ -80,9 +80,11 @@ ggplot(gun.3states.d, aes(
        subtitle = "PA has the highest cumulative Gun Deaths by State and Individual County", 
        caption = "*Counties with cumulative gun deaths lower than 100 are merged into the other category
 Data: Centers for Disease Control and Prevention") +
-  theme(plot.title = element_text(size=11, face = "bold"),
-        plot.subtitle = element_text(size=8.5, face = "italic"),
-        plot.caption = element_text(size = 7))
+  theme(plot.title = element_text(size=9.5, face = "bold"),
+        plot.subtitle = element_text(size=8, face = "italic"),
+        plot.caption = element_text(size = 6.5))
+
+
 
 ```
 
@@ -91,7 +93,7 @@ Data URL: https://data.world/nkrishnaswami/gun-deaths-by-county/workspace/projec
 
 # Visualization 02 (2 points)
 
-This graph compares the population and gun deaths for New Jersey (NJ), New York (NY), and Pennsylvania (PA) from 1999 to 2019.It demonstrates that while NJ and NY exhibit similar population and gun death trends, PA's gun death trend begins to deviate from population growth since 2014. This insight is vital for policymakers to understand the dynamics between population changes and gun violence and develop effective strategies for reducing gun deaths.
+This graph compares the population and gun deaths for New Jersey (NJ), New York (NY), and Pennsylvania (PA) from 1999 to 2019. It demonstrates that while NJ and NY exhibit similar population and gun death trends, PA's gun death trend begins to deviate from population growth since 2014. This insight is vital for policymakers to understand the dynamics between population changes and gun violence. In particular, why nearby state like PA showed different trends between gun deaths and population. This visualization could serve as a starting point for policymakers to develop further research on the PA's gun policies.
 
 ```{r}
 gun.states <- 
@@ -111,12 +113,7 @@ ggplot(gun.states, aes(x = Year)) +
     labels = c("Gun Deaths", "Population")
   ) +
   facet_wrap(~ State, ncol = 3) +
-  labs(
-    title = "Population and Gun Deaths for New Jersey (NJ), New Jersey (NJ) and \nPennslyvania (PA): 1999 - 2019",
-    subtitle = "On average, NJ and NY's population and gun death have a similar trend, while PA's gun death trend \nstart to deviate from population trend since 2014.",
-    caption = "Data: Centers for Disease Control and Prevention") +
-  theme_minimal() +
-  scale_y_continuous(
+   scale_y_continuous(
     name = "Gun Deaths",
     limits = c(0, 1600),
     breaks = seq(0, 1600, 100),
@@ -130,20 +127,21 @@ ggplot(gun.states, aes(x = Year)) +
    scale_x_continuous(
     breaks = seq(1999, 2019, 5), labels = seq(1999, 2019, 5)   
   )+
-  theme(plot.title = element_text(size=11, face = "bold"),
-        plot.subtitle = element_text(size=8.5, face = "italic"),
+  labs(
+    title = "Population and Gun Deaths for New Jersey (NJ), New Jersey (NJ) and \nPennslyvania (PA): 1999 - 2019",
+    subtitle = "On average, NJ and NY's population and gun death have a similar trend, while PA's \ngun death trend start to deviate from population trend since 2014.",
+    caption = "Data: Centers for Disease Control and Prevention") +
+  theme_minimal() +
+  theme(plot.title = element_text(size=9.5, face = "bold"),
+        plot.subtitle = element_text(size=8, face = "italic"),
         plot.caption = element_text(size = 6.5),
         legend.title = element_blank(), 
         legend.text = element_text(size = 6),
         legend.position = "bottom",
-        axis.text = element_text(size=7),
+        axis.text = element_text(size=6),
         axis.title = element_text(size=7),
         panel.grid.minor.y = element_blank(),
         panel.grid.minor.x = element_blank())
-
-#This graph compares the population and gun deaths for New Jersey (NJ), New York (NY), and Pennsylvania (PA) from 1999 to 2019.
-#It demonstrates that while NJ and NY exhibit similar population and gun death trends, PA's gun death trend begins to deviate from population growth since 2014.
-#This insight is vital for policymakers to understand the dynamics between population changes and gun violence. In particular, why nearby state like PA showed different trends between gun deaths and population. This visualization could serve as a starting point for policymakers to develop
 
 
 ```
@@ -151,7 +149,7 @@ ggplot(gun.states, aes(x = Year)) +
 
 # Visualization 03 (2 points)
 
-This bar chart compares total gun deaths by county for the selected years 1999, 2009, and 2019, in NY, PA, and NJ. It provides a clear visualization of the variations in gun deaths over time and between counties within these states. Policymakers can use this information to identify counties with the highest gun death rates and implement localized policies to address this issue effectively.
+This bar chart This graph illustrates the cumulative gun deaths in select counties of New Jersey (NJ) for the years 1999, 2009, and 2019, with a specific focus on counties where the total gun deaths were under 30. It provides a clear visualization of the variations in gun deaths over time and between counties within these states. Policymakers can use this information to identify counties with the highest gun death rates and implement localized policies to address this issue effectively.
 
 ```{r}
 # Filter the data for selected years and states
