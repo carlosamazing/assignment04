@@ -234,32 +234,73 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1>Visualization 03 (2 points)</h1>
 <p>This bar chart This graph illustrates the cumulative gun deaths in select counties of New Jersey (NJ) for the years 1999, 2009, and 2019, with a specific focus on counties where the total gun deaths were under 30. It provides a clear visualization of the variations in gun deaths over time and between counties within these states. Policymakers can use this information to identify counties with the highest gun death rates and implement localized policies to address this issue effectively.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># Filter the data for selected years and states</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a>selected_years <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1999</span>, <span class="dv">2009</span>, <span class="dv">2019</span>)</span>
-<span id="cb4-3"><a href="#cb4-3"></a>filtered_data <span class="ot">&lt;-</span> gun_d <span class="sc">%&gt;%</span></span>
-<span id="cb4-4"><a href="#cb4-4"></a>  <span class="fu">filter</span>(State <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"NJ"</span>), Year <span class="sc">%in%</span> selected_years, Deaths <span class="sc">&lt;</span> <span class="dv">30</span>) </span>
-<span id="cb4-5"><a href="#cb4-5"></a></span>
-<span id="cb4-6"><a href="#cb4-6"></a><span class="co"># Bar Chart Comparing Counties for Selected States (1999, 2009, 2019)</span></span>
-<span id="cb4-7"><a href="#cb4-7"></a><span class="fu">ggplot</span>(filtered_data, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(County, <span class="sc">-</span>Deaths), <span class="at">y =</span> Deaths)) <span class="sc">+</span></span>
-<span id="cb4-8"><a href="#cb4-8"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">fill =</span> <span class="st">"darkgoldenrod"</span>) <span class="sc">+</span></span>
-<span id="cb4-9"><a href="#cb4-9"></a>  <span class="fu">labs</span>(</span>
-<span id="cb4-10"><a href="#cb4-10"></a>    <span class="at">title =</span> <span class="st">"New Jersey's Counties with Total Gun Deaths under 30: 1999, 2009, 2019"</span>,</span>
-<span id="cb4-11"><a href="#cb4-11"></a>    <span class="at">subtitle =</span> <span class="st">"Counties like Middlesex saw a decrease in Gun Death then a increase as time passes"</span>,</span>
-<span id="cb4-12"><a href="#cb4-12"></a>    <span class="at">caption =</span> <span class="st">"Data: Centers for Disease Control and Prevention"</span> </span>
-<span id="cb4-13"><a href="#cb4-13"></a>   ) <span class="sc">+</span></span>
-<span id="cb4-14"><a href="#cb4-14"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> Year, <span class="at">ncol =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
-<span id="cb4-15"><a href="#cb4-15"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb4-16"><a href="#cb4-16"></a>  <span class="fu">ylab</span>(<span class="st">"Cumulative Gun Deaths"</span>)<span class="sc">+</span></span>
-<span id="cb4-17"><a href="#cb4-17"></a>  <span class="fu">theme</span>(</span>
-<span id="cb4-18"><a href="#cb4-18"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fl">9.5</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
-<span id="cb4-19"><a href="#cb4-19"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>, <span class="at">face =</span> <span class="st">"italic"</span>),</span>
-<span id="cb4-20"><a href="#cb4-20"></a>    <span class="at">plot.caption =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fl">6.5</span>),</span>
-<span id="cb4-21"><a href="#cb4-21"></a>    <span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb4-22"><a href="#cb4-22"></a>    <span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>),</span>
-<span id="cb4-23"><a href="#cb4-23"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">5</span>, <span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>)</span>
-<span id="cb4-24"><a href="#cb4-24"></a>  ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># Calculate 5-year intervals for the years 1999-2019.</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>intervals <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1999</span>, <span class="dv">2019</span>, <span class="at">by =</span> <span class="dv">5</span>)</span>
+<span id="cb4-3"><a href="#cb4-3"></a></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="co"># Create a dataset with the total gun deaths in each 5-year interval</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a>gun_deaths_intervals <span class="ot">&lt;-</span> gun_d <span class="sc">%&gt;%</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a>  <span class="fu">filter</span>(State <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"NY"</span>, <span class="st">"PA"</span>, <span class="st">"NJ"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-7"><a href="#cb4-7"></a>  <span class="fu">mutate</span>(<span class="at">Interval =</span> <span class="fu">cut</span>(Year, <span class="at">breaks =</span> intervals, <span class="at">labels =</span> intervals[<span class="sc">-</span><span class="dv">1</span>], <span class="at">include.lowest =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a>  <span class="fu">group_by</span>(State, Interval) <span class="sc">%&gt;%</span></span>
+<span id="cb4-9"><a href="#cb4-9"></a>  <span class="fu">summarize</span>(<span class="at">TotalDeaths =</span> <span class="fu">sum</span>(Deaths))</span>
+<span id="cb4-10"><a href="#cb4-10"></a></span>
+<span id="cb4-11"><a href="#cb4-11"></a></span>
+<span id="cb4-12"><a href="#cb4-12"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb4-13"><a href="#cb4-13"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb4-14"><a href="#cb4-14"></a></span>
+<span id="cb4-15"><a href="#cb4-15"></a>selected_years <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1999</span>, <span class="dv">2009</span>, <span class="dv">2019</span>)</span>
+<span id="cb4-16"><a href="#cb4-16"></a>filtered_data <span class="ot">&lt;-</span> gun_d <span class="sc">%&gt;%</span></span>
+<span id="cb4-17"><a href="#cb4-17"></a>  <span class="fu">filter</span>(State <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"NY"</span>, <span class="st">"PA"</span>, <span class="st">"NJ"</span>), Year <span class="sc">%in%</span> selected_years)</span>
+<span id="cb4-18"><a href="#cb4-18"></a></span>
+<span id="cb4-19"><a href="#cb4-19"></a><span class="co"># Bar Chart Comparing Total Gun Deaths for Selected States (1999, 2009, 2019)</span></span>
+<span id="cb4-20"><a href="#cb4-20"></a>state_chart <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(filtered_data, <span class="fu">aes</span>(<span class="at">x =</span> State, <span class="at">y =</span> Deaths, <span class="at">fill =</span> <span class="fu">as.factor</span>(Year))) <span class="sc">+</span></span>
+<span id="cb4-21"><a href="#cb4-21"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
+<span id="cb4-22"><a href="#cb4-22"></a>  <span class="fu">labs</span>(</span>
+<span id="cb4-23"><a href="#cb4-23"></a>    <span class="at">title =</span> <span class="st">"Total Gun Deaths by State for Selected Years"</span>,</span>
+<span id="cb4-24"><a href="#cb4-24"></a>    <span class="at">subtitle =</span> <span class="st">"Comparison of Gun Deaths by State for 1999, 2009, and 2019"</span>,</span>
+<span id="cb4-25"><a href="#cb4-25"></a>    <span class="at">caption =</span> <span class="st">"Data: Centers for Disease Control and Prevention"</span></span>
+<span id="cb4-26"><a href="#cb4-26"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-27"><a href="#cb4-27"></a>  <span class="fu">scale_fill_discrete</span>(<span class="at">name =</span> <span class="st">"Year"</span>) <span class="sc">+</span></span>
+<span id="cb4-28"><a href="#cb4-28"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb4-29"><a href="#cb4-29"></a>  <span class="fu">theme</span>(</span>
+<span id="cb4-30"><a href="#cb4-30"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb4-31"><a href="#cb4-31"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fl">8.5</span>),</span>
+<span id="cb4-32"><a href="#cb4-32"></a>    <span class="at">plot.caption =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fl">6.5</span>),</span>
+<span id="cb4-33"><a href="#cb4-33"></a>    <span class="at">legend.title =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb4-34"><a href="#cb4-34"></a>    <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">6</span>),</span>
+<span id="cb4-35"><a href="#cb4-35"></a>    <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">7</span>)</span>
+<span id="cb4-36"><a href="#cb4-36"></a>  )</span>
+<span id="cb4-37"><a href="#cb4-37"></a></span>
+<span id="cb4-38"><a href="#cb4-38"></a><span class="fu">print</span>(state_chart)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Assignment04_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># Filter the data for selected years and states</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a>selected_years <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1999</span>, <span class="dv">2009</span>, <span class="dv">2019</span>)</span>
+<span id="cb5-3"><a href="#cb5-3"></a>filtered_data <span class="ot">&lt;-</span> gun_d <span class="sc">%&gt;%</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a>  <span class="fu">filter</span>(State <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"NJ"</span>), Year <span class="sc">%in%</span> selected_years, Deaths <span class="sc">&lt;</span> <span class="dv">30</span>) </span>
+<span id="cb5-5"><a href="#cb5-5"></a></span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="co"># Bar Chart Comparing Counties for Selected States (1999, 2009, 2019)</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a><span class="fu">ggplot</span>(filtered_data, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(County, <span class="sc">-</span>Deaths), <span class="at">y =</span> Deaths)) <span class="sc">+</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">fill =</span> <span class="st">"darkgoldenrod"</span>) <span class="sc">+</span></span>
+<span id="cb5-9"><a href="#cb5-9"></a>  <span class="fu">labs</span>(</span>
+<span id="cb5-10"><a href="#cb5-10"></a>    <span class="at">title =</span> <span class="st">"New Jersey's Counties with Total Gun Deaths under 30: 1999, 2009, 2019"</span>,</span>
+<span id="cb5-11"><a href="#cb5-11"></a>    <span class="at">subtitle =</span> <span class="st">"Counties like Middlesex saw a decrease in Gun Death then a increase as time passes"</span>,</span>
+<span id="cb5-12"><a href="#cb5-12"></a>    <span class="at">caption =</span> <span class="st">"Data: Centers for Disease Control and Prevention"</span> </span>
+<span id="cb5-13"><a href="#cb5-13"></a>   ) <span class="sc">+</span></span>
+<span id="cb5-14"><a href="#cb5-14"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> Year, <span class="at">ncol =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb5-15"><a href="#cb5-15"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb5-16"><a href="#cb5-16"></a>  <span class="fu">ylab</span>(<span class="st">"Cumulative Gun Deaths"</span>)<span class="sc">+</span></span>
+<span id="cb5-17"><a href="#cb5-17"></a>  <span class="fu">theme</span>(</span>
+<span id="cb5-18"><a href="#cb5-18"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fl">9.5</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb5-19"><a href="#cb5-19"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>, <span class="at">face =</span> <span class="st">"italic"</span>),</span>
+<span id="cb5-20"><a href="#cb5-20"></a>    <span class="at">plot.caption =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fl">6.5</span>),</span>
+<span id="cb5-21"><a href="#cb5-21"></a>    <span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb5-22"><a href="#cb5-22"></a>    <span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>),</span>
+<span id="cb5-23"><a href="#cb5-23"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">5</span>, <span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>)</span>
+<span id="cb5-24"><a href="#cb5-24"></a>  ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Assignment04_files/figure-html/unnamed-chunk-4-2.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div style="page-break-after: always;"></div>
@@ -268,35 +309,57 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1>Exercise 04 (2 points)</h1>
 <p>This pie chart illustrates the distribution of gun deaths in 5-year intervals from 1999 to 2019 for NY, PA, and NJ. It allows policymakers to see how gun deaths are distributed over time, which can inform long-term policy planning and highlight any significant shifts in gun violence patterns.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># Calculate 5-year intervals for the years 1999-2019</span></span>
-<span id="cb5-2"><a href="#cb5-2"></a>intervals <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1999</span>, <span class="dv">2019</span>, <span class="at">by =</span> <span class="dv">5</span>)</span>
-<span id="cb5-3"><a href="#cb5-3"></a></span>
-<span id="cb5-4"><a href="#cb5-4"></a><span class="co"># Create a dataset with the total gun deaths in each 5-year interval</span></span>
-<span id="cb5-5"><a href="#cb5-5"></a>gun_deaths_intervals <span class="ot">&lt;-</span> gun_d <span class="sc">%&gt;%</span></span>
-<span id="cb5-6"><a href="#cb5-6"></a>  <span class="fu">filter</span>(State <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"NY"</span>, <span class="st">"PA"</span>, <span class="st">"NJ"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb5-7"><a href="#cb5-7"></a>  <span class="fu">mutate</span>(<span class="at">Interval =</span> <span class="fu">cut</span>(Year, <span class="at">breaks =</span> intervals, <span class="at">labels =</span> intervals[<span class="sc">-</span><span class="dv">1</span>], <span class="at">include.lowest =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb5-8"><a href="#cb5-8"></a>  <span class="fu">group_by</span>(State, Interval) <span class="sc">%&gt;%</span></span>
-<span id="cb5-9"><a href="#cb5-9"></a>  <span class="fu">summarize</span>(<span class="at">TotalDeaths =</span> <span class="fu">sum</span>(Deaths))</span>
-<span id="cb5-10"><a href="#cb5-10"></a></span>
-<span id="cb5-11"><a href="#cb5-11"></a>  <span class="fu">ggplot</span>(gun_deaths_intervals, <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">""</span>, <span class="at">y =</span> TotalDeaths, <span class="at">fill =</span> <span class="fu">as.factor</span>(Interval))) <span class="sc">+</span></span>
-<span id="cb5-12"><a href="#cb5-12"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
-<span id="cb5-13"><a href="#cb5-13"></a>  <span class="fu">coord_polar</span>(<span class="at">theta =</span> <span class="st">"y"</span>) <span class="sc">+</span></span>
-<span id="cb5-14"><a href="#cb5-14"></a>  <span class="fu">labs</span>(</span>
-<span id="cb5-15"><a href="#cb5-15"></a>    <span class="at">title =</span> <span class="st">"Distribution of Gun Deaths by 5-Year Intervals (1999-2019)"</span>,</span>
-<span id="cb5-16"><a href="#cb5-16"></a>    <span class="at">subtitle =</span> <span class="st">"The Proportion of Gun Deaths in 5-Year Intervals"</span>,</span>
-<span id="cb5-17"><a href="#cb5-17"></a>    <span class="at">caption =</span> <span class="st">"Data: Centers for Disease Control and Prevention"</span></span>
-<span id="cb5-18"><a href="#cb5-18"></a>  ) <span class="sc">+</span></span>
-<span id="cb5-19"><a href="#cb5-19"></a>  <span class="fu">scale_fill_discrete</span>(<span class="at">name =</span> <span class="st">"5-Year Interval"</span>) <span class="sc">+</span></span>
-<span id="cb5-20"><a href="#cb5-20"></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
-<span id="cb5-21"><a href="#cb5-21"></a>  <span class="fu">theme</span>(</span>
-<span id="cb5-22"><a href="#cb5-22"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
-<span id="cb5-23"><a href="#cb5-23"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fl">8.5</span>),</span>
-<span id="cb5-24"><a href="#cb5-24"></a>    <span class="at">plot.caption =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fl">6.5</span>),</span>
-<span id="cb5-25"><a href="#cb5-25"></a>    <span class="at">legend.title =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb5-26"><a href="#cb5-26"></a>    <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">6</span>)</span>
-<span id="cb5-27"><a href="#cb5-27"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>pie_chart <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(gun_deaths_intervals, <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">""</span>, <span class="at">y =</span> TotalDeaths, <span class="at">fill =</span> <span class="fu">as.factor</span>(Interval))) <span class="sc">+</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb6-3"><a href="#cb6-3"></a>  <span class="fu">coord_polar</span>(<span class="at">theta =</span> <span class="st">"y"</span>) <span class="sc">+</span></span>
+<span id="cb6-4"><a href="#cb6-4"></a>  <span class="fu">labs</span>(</span>
+<span id="cb6-5"><a href="#cb6-5"></a>    <span class="at">title =</span> <span class="st">"Distribution of Gun Deaths by 5-Year Intervals (1999-2019)"</span>,</span>
+<span id="cb6-6"><a href="#cb6-6"></a>    <span class="at">subtitle =</span> <span class="st">"The Proportion of Gun Deaths in 5-Year Intervals"</span>,</span>
+<span id="cb6-7"><a href="#cb6-7"></a>    <span class="at">caption =</span> <span class="st">"Data: Centers for Disease Control and Prevention"</span></span>
+<span id="cb6-8"><a href="#cb6-8"></a>  ) <span class="sc">+</span></span>
+<span id="cb6-9"><a href="#cb6-9"></a>  <span class="fu">scale_fill_discrete</span>(<span class="at">name =</span> <span class="st">"5-Year Interval"</span>) <span class="sc">+</span></span>
+<span id="cb6-10"><a href="#cb6-10"></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
+<span id="cb6-11"><a href="#cb6-11"></a>  <span class="fu">theme</span>(</span>
+<span id="cb6-12"><a href="#cb6-12"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb6-13"><a href="#cb6-13"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fl">8.5</span>),</span>
+<span id="cb6-14"><a href="#cb6-14"></a>    <span class="at">plot.caption =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fl">6.5</span>),</span>
+<span id="cb6-15"><a href="#cb6-15"></a>    <span class="at">legend.title =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb6-16"><a href="#cb6-16"></a>    <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">6</span>)</span>
+<span id="cb6-17"><a href="#cb6-17"></a>  )</span>
+<span id="cb6-18"><a href="#cb6-18"></a></span>
+<span id="cb6-19"><a href="#cb6-19"></a><span class="fu">print</span>(pie_chart)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Assignment04_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="co"># Calculate 5-year intervals for the years 1999-2019</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a>intervals <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1999</span>, <span class="dv">2019</span>, <span class="at">by =</span> <span class="dv">5</span>)</span>
+<span id="cb7-3"><a href="#cb7-3"></a></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="co"># Create a dataset with the total gun deaths in each 5-year interval</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a>gun_deaths_intervals <span class="ot">&lt;-</span> gun_d <span class="sc">%&gt;%</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a>  <span class="fu">filter</span>(State <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"NY"</span>, <span class="st">"PA"</span>, <span class="st">"NJ"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a>  <span class="fu">mutate</span>(<span class="at">Interval =</span> <span class="fu">cut</span>(Year, <span class="at">breaks =</span> intervals, <span class="at">labels =</span> intervals[<span class="sc">-</span><span class="dv">1</span>], <span class="at">include.lowest =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a>  <span class="fu">group_by</span>(State, Interval) <span class="sc">%&gt;%</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a>  <span class="fu">summarize</span>(<span class="at">TotalDeaths =</span> <span class="fu">sum</span>(Deaths))</span>
+<span id="cb7-10"><a href="#cb7-10"></a></span>
+<span id="cb7-11"><a href="#cb7-11"></a>  <span class="fu">ggplot</span>(gun_deaths_intervals, <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">""</span>, <span class="at">y =</span> TotalDeaths, <span class="at">fill =</span> <span class="fu">as.factor</span>(Interval))) <span class="sc">+</span></span>
+<span id="cb7-12"><a href="#cb7-12"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb7-13"><a href="#cb7-13"></a>  <span class="fu">coord_polar</span>(<span class="at">theta =</span> <span class="st">"y"</span>) <span class="sc">+</span></span>
+<span id="cb7-14"><a href="#cb7-14"></a>  <span class="fu">labs</span>(</span>
+<span id="cb7-15"><a href="#cb7-15"></a>    <span class="at">title =</span> <span class="st">"Distribution of Gun Deaths by 5-Year Intervals (1999-2019)"</span>,</span>
+<span id="cb7-16"><a href="#cb7-16"></a>    <span class="at">subtitle =</span> <span class="st">"The Proportion of Gun Deaths in 5-Year Intervals"</span>,</span>
+<span id="cb7-17"><a href="#cb7-17"></a>    <span class="at">caption =</span> <span class="st">"Data: Centers for Disease Control and Prevention"</span></span>
+<span id="cb7-18"><a href="#cb7-18"></a>  ) <span class="sc">+</span></span>
+<span id="cb7-19"><a href="#cb7-19"></a>  <span class="fu">scale_fill_discrete</span>(<span class="at">name =</span> <span class="st">"5-Year Interval"</span>) <span class="sc">+</span></span>
+<span id="cb7-20"><a href="#cb7-20"></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
+<span id="cb7-21"><a href="#cb7-21"></a>  <span class="fu">theme</span>(</span>
+<span id="cb7-22"><a href="#cb7-22"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb7-23"><a href="#cb7-23"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fl">8.5</span>),</span>
+<span id="cb7-24"><a href="#cb7-24"></a>    <span class="at">plot.caption =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fl">6.5</span>),</span>
+<span id="cb7-25"><a href="#cb7-25"></a>    <span class="at">legend.title =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb7-26"><a href="#cb7-26"></a>    <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">6</span>)</span>
+<span id="cb7-27"><a href="#cb7-27"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Assignment04_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
