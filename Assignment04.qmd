@@ -31,7 +31,7 @@ gun_d <- read_csv("~/Desktop/Data Science/Assignment04/gun_deaths_us_1999_2019.c
 
 gun.3states <- filter(
   gun_d, 
-  (State == "NY") | (State == "PA") | (State == "MD")
+  (State == "NY") | (State == "PA") | (State == "NJ")
   ) 
 gun.3states.d <- gun.3states %>% 
   group_by(State, County) %>% 
@@ -82,6 +82,9 @@ Data: Centers for Disease Control and Prevention") +
         plot.subtitle = element_text(size=8.5, face = "italic"),
         plot.caption = element_text(size = 7))
 
+#This treemap visualizes the cumulative gun deaths by county for New York (NY), Pennsylvania (PA), and New Jersey (NJ) from 1999 to 2019. 
+#It highlights the disparities in gun deaths across counties within these states, with counties having fewer than 100 cumulative deaths combined into the "Other" category. 
+#This information is crucial for policymakers, as it identifies regions with higher gun violence rates, allowing for targeted intervention and resource allocation.
 ```
 
 Data URL: https://data.world/nkrishnaswami/gun-deaths-by-county/workspace/project-summary?agentid=nkrishnaswami&datasetid=gun-deaths-by-county
@@ -136,6 +139,9 @@ ggplot(gun.states, aes(x = Year)) +
         panel.grid.minor.y = element_blank(),
         panel.grid.minor.x = element_blank())
 
+#This graph compares the population and gun deaths for New Jersey (NJ), New York (NY), and Pennsylvania (PA) from 1999 to 2019.
+#It demonstrates that while NJ and NY exhibit similar population and gun death trends, PA's gun death trend begins to deviate from population growth since 2014.
+#This insight is vital for policymakers to understand the dynamics between population changes and gun violence. In particular, why nearby state like PA showed different trends between gun deaths and population. This visualization could serve as a starting point for policymakers to develop
 
 
 ```
@@ -143,6 +149,55 @@ ggplot(gun.states, aes(x = Year)) +
 
 # Visualization 03 (2 points)
 ```{r}
+# Filter the data for selected years and states
+selected_years <- c(1999, 2009, 2019)
+filtered_data <- gun_d %>%
+  filter(State %in% c("NY", "PA", "NJ"), Year %in% selected_years)
+# Bar Chart Comparing Counties for Selected States (1999, 2009, 2019)
+county_chart <- 
+  ggplot(filtered_data, aes(x = reorder(County, -Deaths), y = Deaths, fill = State)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Total Gun Deaths by County for Selected States",
+    subtitle = "Comparison of Gun Deaths by County for 1999, 2009, and 2019",
+    caption = "Data: Centers for Disease Control and Prevention"
+  ) +
+  scale_fill_manual(
+    values = c("NY" = "skyblue3", "PA" = "#002147", "NJ" = "darkgoldenrod"),
+    name = "State"
+  ) +
+  facet_wrap(~ Year, ncol = 3) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 11, face = "bold"),
+    plot.subtitle = element_text(size = 8.5),
+    plot.caption = element_text(size = 6.5),
+    legend.title = element_blank(),
+    legend.text = element_text(size = 6),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.title = element_text(size = 7)
+  )
+
+#chart03
+# Bar Chart Comparing Total Gun Deaths for Selected States (1999, 2009, 2019)
+state_chart <- 
+  ggplot(filtered_data, aes(x = State, y = Deaths, fill = as.factor(Year))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(
+    title = "Total Gun Deaths by State for Selected Years",
+    subtitle = "Comparison of Gun Deaths by State for 1999, 2009, and 2019",
+    caption = "Data: Centers for Disease Control and Prevention"
+  ) +
+  scale_fill_discrete(name = "Year") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 11, face = "bold"),
+    plot.subtitle = element_text(size = 8.5),
+    plot.caption = element_text(size = 6.5),
+    legend.title = element_blank(),
+    legend.text = element_text(size = 6),
+    axis.title = element_text(size = 7)
+  )
 
 
 ```
@@ -150,6 +205,24 @@ ggplot(gun.states, aes(x = Year)) +
 
 # Exercise 04 (2 points)
 ```{r}
+pie_chart <- 
+  ggplot(gun_deaths_intervals, aes(x = "", y = TotalDeaths, fill = as.factor(Interval))) +
+  geom_bar(stat = "identity") +
+  coord_polar(theta = "y") +
+  labs(
+    title = "Distribution of Gun Deaths by 5-Year Intervals (1999-2019)",
+    subtitle = "The Proportion of Gun Deaths in 5-Year Intervals",
+    caption = "Data: Centers for Disease Control and Prevention"
+  ) +
+  scale_fill_discrete(name = "5-Year Interval") +
+  theme_void() +
+  theme(
+    plot.title = element_text(size = 11, face = "bold"),
+    plot.subtitle = element_text(size = 8.5),
+    plot.caption = element_text(size = 6.5),
+    legend.title = element_blank(),
+    legend.text = element_text(size = 6)
+  )
 
 
 ```
