@@ -27,7 +27,7 @@ library(ggridges)
 # Visualization 01 (1 point)
 
 ```{r}
-gun_d <- read_csv("~/Desktop/Data Science/Assignment04/gun_deaths_us_1999_2019.csv")
+gun_d <- read_csv("gun_deaths_us_1999_2019.csv")
 
 gun.3states <- filter(
   gun_d, 
@@ -143,13 +143,68 @@ ggplot(gun.states, aes(x = Year)) +
 
 # Visualization 03 (2 points)
 ```{r}
+# Calculate 5-year intervals for the years 1999-2019
+intervals <- seq(1999, 2019, by = 5)
 
+# Create a dataset with the total gun deaths in each 5-year interval
+gun_deaths_intervals <- gun_d %>%
+  filter(State %in% c("NY", "PA", "NJ")) %>%
+  mutate(Interval = cut(Year, breaks = intervals, labels = intervals[-1], include.lowest = TRUE)) %>%
+  group_by(State, Interval) %>%
+  summarize(TotalDeaths = sum(Deaths))
+
+
+library(dplyr)
+library(ggplot2)
+
+selected_years <- c(1999, 2009, 2019)
+filtered_data <- gun_d %>%
+  filter(State %in% c("NY", "PA", "NJ"), Year %in% selected_years)
+
+# Bar Chart Comparing Total Gun Deaths for Selected States (1999, 2009, 2019)
+state_chart <- ggplot(filtered_data, aes(x = State, y = Deaths, fill = as.factor(Year))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(
+    title = "Total Gun Deaths by State for Selected Years",
+    subtitle = "Comparison of Gun Deaths by State for 1999, 2009, and 2019",
+    caption = "Data: Centers for Disease Control and Prevention"
+  ) +
+  scale_fill_discrete(name = "Year") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 11, face = "bold"),
+    plot.subtitle = element_text(size = 8.5),
+    plot.caption = element_text(size = 6.5),
+    legend.title = element_blank(),
+    legend.text = element_text(size = 6),
+    axis.title = element_text(size = 7)
+  )
+
+print(state_chart)
 
 ```
 \newpage
 
 # Exercise 04 (2 points)
 ```{r}
+pie_chart <- ggplot(gun_deaths_intervals, aes(x = "", y = TotalDeaths, fill = as.factor(Interval))) +
+  geom_bar(stat = "identity") +
+  coord_polar(theta = "y") +
+  labs(
+    title = "Distribution of Gun Deaths by 5-Year Intervals (1999-2019)",
+    subtitle = "The Proportion of Gun Deaths in 5-Year Intervals",
+    caption = "Data: Centers for Disease Control and Prevention"
+  ) +
+  scale_fill_discrete(name = "5-Year Interval") +
+  theme_void() +
+  theme(
+    plot.title = element_text(size = 11, face = "bold"),
+    plot.subtitle = element_text(size = 8.5),
+    plot.caption = element_text(size = 6.5),
+    legend.title = element_blank(),
+    legend.text = element_text(size = 6)
+  )
 
+print(pie_chart)
 
 ```
